@@ -77,7 +77,7 @@ SkyNet_ATC/
 └── README.md           # This file
 ```
 
-## 🎮 **User Interface**
+##  **User Interface**
 
 ### **Main Menu Options**
 1. **Display Airspace Visualizer (Radar)** - Shows real-time radar grid
