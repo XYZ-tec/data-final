@@ -740,14 +740,12 @@ public:
         try {
             aircraftRegistry.saveToFile("aircraft_registry.txt");
             flightLog.saveToFile("flight_log.txt");
-            airspace.saveToFile("airspace_graph.txt"); // NEW
 
             setColor(COLOR_SUCCESS);
             cout << "\n  Data saved successfully!\n";
             setColor(COLOR_INFO);
             cout << "    ---> aircraft_registry.txt\n";
             cout << "    ---> flight_log.txt\n";
-            cout << "    ---> airspace_graph.txt\n"; // NEW
             setColor(COLOR_RESET);
         }
         catch (FileOperationException& e) {
@@ -763,45 +761,48 @@ public:
             setColor(COLOR_INFO);
             cout << "\n  Loading saved data...\n";
 
-            // Clear current state
-            initializeRadar();
-            MinHeap tempHeap;
-            landingQueue = tempHeap;
+            // IMPORTANT: Clear heap before loading to prevent duplicates
+            MinHeap tempHeap;  // Create temporary heap
+            landingQueue = tempHeap;  // Replace with empty heap
 
-            // Load all data
-            airspace.loadFromFile("airspace_graph.txt"); // NEW - load graph first
             aircraftRegistry.loadFromFile("aircraft_registry.txt");
-            flightLog.loadFromFile("flight_log.txt");
 
-            // Rebuild radar with loaded airspace
-            for (int i = 0; i < GRID_SIZE; i++)
-                for (int j = 0; j < GRID_SIZE; j++)
-                    radar[i][j] = '.';
-
-            // Mark airports and waypoints on radar based on loaded graph
-            for (int i = 0; i < airspace.getNodeCount(); i++) { // Need to add getNodeCount() to Graph
-                GraphNode* node = airspace.getNodeByIndex(i); // Need to add this method too
-                if (node) {
-                    if (node->isAirport) {
-                        radar[node->x][node->y] = 'A';
-                    }
-                    else {
-                        radar[node->x][node->y] = 'W';
-                    }
-                }
-            }
-
-            // Get all loaded aircraft and rebuild queue
             Aircraft allAircraft[100];
             int count = 0;
             aircraftRegistry.getAllAircraft(allAircraft, count);
 
+            // Rebuild landing queue from loaded aircraft
             for (int i = 0; i < count; i++) {
                 if (allAircraft[i].status != "Landed") {
                     landingQueue.insert(allAircraft[i]);
+                }
+            }
 
-                    // Update radar - aircraft position should match graph node
+            flightLog.loadFromFile("flight_log.txt");
+
+            // Rebuild radar
+            initializeRadar();
+
+            radar[2][2] = 'A';
+            radar[17][17] = 'A';
+            radar[10][10] = 'A';
+            radar[2][17] = 'A';
+            radar[17][2] = 'A';
+
+            // Restore planes and re-occupy nodes in graph
+            for (int i = 0; i < count; i++) {
+                if (allAircraft[i].status != "Landed") {
                     radar[allAircraft[i].x][allAircraft[i].y] = 'P';
+                    try {
+                        airspace.occupyNode(allAircraft[i].currentNode, allAircraft[i].flightID);
+                    }
+                    catch (CollisionException& e) {
+                        // Log collision but continue loading
+                        setColor(COLOR_WARNING);
+                        cout << "  Warning: " << e.what() << " (collision during load)\n";
+                        setColor(COLOR_RESET);
+                        airspace.freeNode(allAircraft[i].currentNode);
+                    }
                 }
             }
 
@@ -810,18 +811,12 @@ public:
             cout << "  Loaded " << count << " aircraft records\n";
             cout << "  Landing queue rebuilt\n";
             cout << "  Flight log restored\n";
-            cout << "  Airspace graph loaded\n";
+            cout << "  Radar refreshed\n";
             setColor(COLOR_RESET);
         }
-        catch (const FileOperationException& e) {
+        catch (FileOperationException& e) {
             setColor(COLOR_WARNING);
             cout << "  No saved data found. Starting fresh.\n";
-            setColor(COLOR_RESET);
-        }
-        catch (const exception& e) {
-            setColor(COLOR_DANGER);
-            cout << "  Error loading data: " << e.what() << "\n";
-            cout << "  Starting with fresh system.\n";
             setColor(COLOR_RESET);
         }
     }

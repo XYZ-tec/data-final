@@ -1,2 +1,2 @@
 1
-Pk-587,911,84,FSD,KHI,3,In Flight,2,17,FSD,0
+PK-80,alpha87,78,ISB,FSD,2,In Flight,10,10,ISB,0
