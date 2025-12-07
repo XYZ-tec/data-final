@@ -8,11 +8,8 @@
 #include <windows.h>
 #include <cstdlib>
 #include <ctime>
-#include <cmath>
 #include <sstream>
-#include <climits>
 #include <cstring>
-#include <chrono>
 
 using namespace std;
 
@@ -161,7 +158,18 @@ struct Aircraft
         getline(ss, token, ','); a.x = stoi(token);
         getline(ss, token, ','); a.y = stoi(token);
         getline(ss, a.currentNode, ',');
-        getline(ss, token); a.timestamp = stol(token);
+        
+        if (getline(ss, token)) {
+            try {
+                a.timestamp = stol(token);
+            }
+            catch (...) {
+                a.timestamp = 0;
+            }
+        }
+        else {
+            a.timestamp = 0;
+        }
 
         return a;
     }
@@ -690,7 +698,121 @@ public:
             clearEdges(adjList[i]);
         }
     }
+    int getNodeCount() const
+    {
+        return nodeCount;
+    }
 
+    GraphNode* getNodeByIndex(int index)
+    {
+        if (index >= 0 && index < nodeCount) 
+        {
+            return nodes[index];
+        }
+        return NULL;
+    }
+    void saveToFile(string filename) {
+        ofstream file(filename);
+        if (!file.is_open()) throw FileOperationException(filename);
+
+        // Save node occupancy information
+        file << nodeCount << "\n";
+        for (int i = 0; i < nodeCount; i++) {
+            file << nodes[i]->name << ","
+                << nodes[i]->x << ","
+                << nodes[i]->y << ","
+                << nodes[i]->isAirport << ","
+                << nodes[i]->occupied << ","
+                << nodes[i]->occupiedBy << "\n";
+        }
+
+        // Save edges
+        int edgeCount = 0;
+        for (int i = 0; i < nodeCount; i++) {
+            Edge* edge = adjList[i];
+            while (edge != NULL) {
+                edgeCount++;
+                edge = edge->next;
+            }
+        }
+
+        file << edgeCount << "\n";
+        for (int i = 0; i < nodeCount; i++) {
+            Edge* edge = adjList[i];
+            while (edge != NULL) {
+                file << nodes[i]->name << ","
+                    << edge->destination << ","
+                    << edge->weight << "\n";
+                edge = edge->next;
+            }
+        }
+
+        file.close();
+    }
+
+    void loadFromFile(string filename) {
+        ifstream file(filename);
+        if (!file.is_open()) throw FileOperationException(filename);
+
+        // Clear existing graph
+        for (int i = 0; i < nodeCount; i++) {
+            delete nodes[i];
+            clearEdges(adjList[i]);
+            adjList[i] = NULL;
+        }
+        nodeCount = 0;
+
+        // Load nodes
+        string line;
+        getline(file, line);
+        int nCount = stoi(line);
+
+        for (int i = 0; i < nCount; i++) {
+            getline(file, line);
+            stringstream ss(line);
+            string token;
+
+            string name;
+            int x, y;
+            bool isAirport, occupied;
+            string occupiedBy;
+
+            getline(ss, name, ',');
+            getline(ss, token, ','); x = stoi(token);
+            getline(ss, token, ','); y = stoi(token);
+            getline(ss, token, ','); isAirport = (token == "1");
+            getline(ss, token, ','); occupied = (token == "1");
+            getline(ss, occupiedBy, ',');
+
+            addNode(name, x, y, isAirport);
+            if (occupied) {
+                int idx = findNodeIndex(name);
+                if (idx != -1) {
+                    nodes[idx]->occupied = true;
+                    nodes[idx]->occupiedBy = occupiedBy;
+                }
+            }
+        }
+
+        // Load edges
+        getline(file, line);
+        int eCount = stoi(line);
+
+        for (int i = 0; i < eCount; i++) {
+            getline(file, line);
+            stringstream ss(line);
+            string src, dest, weightStr;
+
+            getline(ss, src, ',');
+            getline(ss, dest, ',');
+            getline(ss, weightStr, ',');
+
+            int weight = stoi(weightStr);
+            addEdge(src, dest, weight);
+        }
+
+        file.close();
+    }
     void addNode(string name, int x, int y, bool isAirport = false)
     {
         if (findNodeIndex(name) != -1) return;
