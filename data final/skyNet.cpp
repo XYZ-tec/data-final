@@ -133,7 +133,7 @@ private:
         radar[17][2] = 'A';
     }
 
-    void clearScreen() { system("cls"); }
+    //void clearScreen() { system("cls"); }
 
     void displayRadar()
     {
@@ -279,22 +279,25 @@ public:
             Aircraft newAircraft(flightID, model, fuelLevel, origin, destination, priority);
             newAircraft.validate();
 
-            string airportList[10];
-            int airportCount = 0;
-            airspace.getAirports(airportList, airportCount);
+            // --- FIX STARTS HERE ---
 
-            if (airportCount == 0)
-                throw InvalidInputException("No airports available");
-
-            int randomAirport = rand() % airportCount;
-            string startNode = airportList[randomAirport];
-
+            // 1. Use the 'origin' string the user typed as the start node
+            string startNode = origin;
             GraphNode* startGraphNode = airspace.getNodeByName(startNode);
-            if (startGraphNode == NULL)
-                throw InvalidInputException("Selected airport not found");
 
+            // 2. Validate: Does this place exist?
+            if (startGraphNode == NULL)
+                throw InvalidInputException("Origin '" + origin + "' not found in airspace");
+
+            // 3. Validate: Is it actually an Airport? (Prevent spawning at waypoints)
+            if (!startGraphNode->isAirport)
+                throw InvalidInputException("Location '" + origin + "' is not a valid Airport");
+
+            // 4. Validate: Is it occupied?
             if (airspace.isNodeOccupied(startNode))
-                throw CollisionException("(" + toString(startGraphNode->x) + ", " + toString(startGraphNode->y) + ")");
+                throw CollisionException("Airport " + origin + " is currently occupied at (" + toString(startGraphNode->x) + ", " + toString(startGraphNode->y) + ")");
+
+            // --- FIX ENDS HERE ---
 
             newAircraft.x = startGraphNode->x;
             newAircraft.y = startGraphNode->y;
@@ -371,7 +374,14 @@ public:
     {
         try {
             Aircraft landed = landingQueue.extractMin();
-            radar[landed.x][landed.y] = '.';
+            // Check if the current node is an airport before clearing
+            GraphNode* node = airspace.getNodeByName(landed.currentNode);
+            if (node != NULL && node->isAirport) {
+                radar[landed.x][landed.y] = 'A'; // Restore Airport icon
+            }
+            else {
+                radar[landed.x][landed.y] = '.'; // Clear to empty sky
+            }
             airspace.freeNode(landed.currentNode);
             landed.status = "Landed";
 
@@ -868,7 +878,7 @@ public:
 
             switch (choice) {
             case 1:
-                clearScreen();
+                //clearScreen();
                 displayRadar();
                 break;
             case 2:
@@ -916,7 +926,7 @@ public:
             setColor(COLOR_RESET);
             cin.ignore();
             cin.get();
-            clearScreen();
+           // clearScreen();
         }
     }
 };
