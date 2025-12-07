@@ -131,6 +131,14 @@ private:
         radar[10][10] = 'A';
         radar[2][17] = 'A';
         radar[17][2] = 'A';
+		radar[5][5] = 'W';
+        radar[15][5] = 'W';
+        radar[5][15] = 'W';
+        radar[15][15] = 'W';
+        radar[10][2] = 'W';
+        radar[10][18] = 'W';
+        radar[2][10] = 'W';
+		radar[18][10] = 'W';
     }
 
     //void clearScreen() { system("cls"); }
