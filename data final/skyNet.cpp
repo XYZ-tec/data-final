@@ -279,7 +279,7 @@ public:
             Aircraft newAircraft(flightID, model, fuelLevel, origin, destination, priority);
             newAircraft.validate();
 
-            // --- FIX STARTS HERE ---
+            // --- FIX STARTS HERE ---//here
 
             // 1. Use the 'origin' string the user typed as the start node
             string startNode = origin;
