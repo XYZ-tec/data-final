@@ -122,7 +122,7 @@ QR-505,AirbusA380,30,Doha,Islamabad,3,Landed,2,17,FSD,200
 BA-111,Boeing787,45,London,Lahore,4,Landed,17,17,LHR,300
 ```
 
-## 🎯 **Technical Requirements**
+##  **Technical Requirements**
 
 ### **Constraints**
 - ✅ **No STL Containers** used for core data structures
@@ -153,7 +153,7 @@ BA-111,Boeing787,45,London,Lahore,4,Landed,17,17,LHR,300
 - Dijkstra: **O(V²)** with adjacency list
 - Collision detection: **O(n²)** worst-case
 
-## 🔧 **Development Details**
+##  **Development Details**
 
 ### **Error Handling**
 - Custom exception classes for different error types
@@ -166,7 +166,7 @@ BA-111,Boeing787,45,London,Lahore,4,Landed,17,17,LHR,300
 - Manual memory allocation/deallocation
 - No memory leaks
 
-## 🧪 **Testing Scenarios**
+##  **Testing Scenarios**
 
 ### **Test 1: Basic Operations**
 1. Add flight with normal priority
@@ -190,7 +190,7 @@ BA-111,Boeing787,45,London,Lahore,4,Landed,17,17,LHR,300
 2. Verify collision exception is thrown
 3. Use collision detection feature
 
-## 📈 **Learning Outcomes**
+##  **Learning Outcomes**
 
 This project demonstrates practical implementation of:
 1. **Graph Theory** with real-world application (airspace)
@@ -205,17 +205,12 @@ This project demonstrates practical implementation of:
 -Misbah Irfan
 -Musferah
 
-## **References**
-- **Textbook**: Data Structures and Algorithm Analysis in C++ by Mark Allen Weiss
-- **Project Manual**: Provided by course instructor
-- **C++ Documentation**: cppreference.com
-
 ## **License**
 This project is developed for educational purposes as part of a university course. All rights reserved by the developers.
 
 ---
 
-## 🎓 **Academic Integrity Statement**
+##  **Academic Integrity Statement**
 This project is submitted as partial fulfillment of the requirements for the Data Structures course. All code is original work developed by the team members, with guidance from course materials and instructor.
 ---
 **Project Status**: ✅ Complete 
